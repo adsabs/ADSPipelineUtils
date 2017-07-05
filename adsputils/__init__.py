@@ -31,7 +31,7 @@ utc_zone = tz.tzutc()
 def _get_proj_home(extra_frames=0):
     """Get the location of the caller module; then go up max_levels until
     finding requirements.txt"""
-     
+
     frame = inspect.stack()[2+extra_frames]
     module = inspect.getsourcefile(frame[0])
     if not module:
@@ -47,50 +47,50 @@ def _get_proj_home(extra_frames=0):
         max_level -= 1
     sys.stderr.write("Sorry, cant find the proj home; returning the location of the caller")
     return d
-        
+
 
 
 def get_date(timestr=None):
     """
     Always parses the time to be in the UTC time zone; or returns
     the current date (with UTC timezone specified)
-    
+
     :param: timestr
     :type: str or None
-    
+
     :return: datetime object with tzinfo=tzutc()
     """
     if timestr is None:
         return datetime.utcnow().replace(tzinfo=utc_zone)
-    
+
     if isinstance(timestr, datetime):
         date = timestr
     else:
         date = parser.parse(timestr)
-    
+
     if 'tzinfo' in repr(date): #hack, around silly None.encode()...
         date = date.astimezone(utc_zone)
     else:
-        # this depends on current locale, for the moment when not 
+        # this depends on current locale, for the moment when not
         # timezone specified, I'll treat them as UTC (however, it
         # is probably not correct and should work with an offset
         # but to that we would have to know which timezone the
-        # was created) 
-        
+        # was created)
+
         #local_date = date.replace(tzinfo=local_zone)
         #date = date.astimezone(utc_zone)
-        
+
         date = date.replace(tzinfo=utc_zone)
-        
+
     return date
 
 
-    
+
 
 def load_config(proj_home=None, extra_frames=0):
     """
     Loads configuration from config.py and also from local_config.py
-    
+
     :param: proj_home - str, location of the home - we'll always try
         to load config files from there. If the location is empty,
         we'll inspect the caller and derive the location of its parent
@@ -98,27 +98,27 @@ def load_config(proj_home=None, extra_frames=0):
     :param: extra_frames - int, number of frames to look back; default
         is 2, which is good when the load_config() is called directly,
         but when called from inside classes, we need to add extra more
-    
+
     :return dictionary
     """
     conf = {}
-    
+
     if proj_home is not None:
         proj_home = os.path.abspath(proj_home)
         if not os.path.exists(proj_home):
             raise Exception('{proj_home} doesnt exist'.format(proj_home=proj_home))
     else:
         proj_home = _get_proj_home(extra_frames=extra_frames)
-        
-        
+
+
     if proj_home not in sys.path:
         sys.path.append(proj_home)
-            
+
     conf['PROJ_HOME'] = proj_home
-    
+
     conf.update(load_module(os.path.join(proj_home, 'config.py')))
     conf.update(load_module(os.path.join(proj_home, 'local_config.py')))
-    
+
     return conf
 
 
@@ -126,10 +126,10 @@ def load_config(proj_home=None, extra_frames=0):
 def load_module(filename):
     """
     Loads module, first from config.py then from local_config.py
-    
+
     :return dictionary
     """
-    
+
     filename = os.path.join(filename)
     d = imp.new_module('config')
     d.__file__ = filename
@@ -149,8 +149,8 @@ def setup_logging(name_, level='WARN', proj_home=None):
 
     :param: name_: the name of the logfile (not the destination!)
     :param: level: the level of the logging DEBUG, INFO, WARN
-    :param: proj_home: optional, starting dir in which we'll 
-            check for (and create) 'logs' folder and set the 
+    :param: proj_home: optional, starting dir in which we'll
+            check for (and create) 'logs' folder and set the
             logger there
     :return: logging instance
     """
@@ -161,13 +161,13 @@ def setup_logging(name_, level='WARN', proj_home=None):
     datefmt = u'%m/%d/%Y %H:%M:%S'
     formatter = logging.Formatter(fmt=logfmt, datefmt=datefmt)
     logging_instance = logging.getLogger(name_)
-    
+
     if proj_home:
         proj_home = os.path.abspath(proj_home)
         fn_path = os.path.join(proj_home, 'logs')
     else:
         fn_path = os.path.join(_get_proj_home(), 'logs')
-        
+
     if not os.path.exists(fn_path):
         os.makedirs(fn_path)
 
@@ -221,13 +221,13 @@ def overrides(interface_class):
 
 class ADSCelery(Celery):
     """ADS Pipeline worker; used by all the pipeline applications.
-    
-    
+
+
     This class should be instantiated inside tasks.py:
-    
+
     app = MyADSPipelineCelery()
     """
-    
+
     def __init__(self, app_name, *args, **kwargs):
         """
         :param: app_name - string, name of the application (can be anything)
@@ -240,9 +240,9 @@ class ADSCelery(Celery):
         if 'local_config' in kwargs and kwargs['local_config']:
             local_config = kwargs.pop('local_config')
             self._config.update(local_config) #our config
-            
+
         self.logger = setup_logging(app_name, level=self._config.get('LOGGING_LEVEL', 'INFO'))
-        
+
         # make sure that few important params are set for celery
         if 'broker' not in kwargs:
             kwargs['broker'] = self._config.get('CELERY_BROKER', 'pyamqp://'),
@@ -260,10 +260,10 @@ class ADSCelery(Celery):
 
         Celery.__init__(self, *args, **kwargs)
         self._set_serializer()
-        
-        
+
+
         self.conf.update(self._config) #celery's config (devs should be careful to avoid clashes)
-        
+
         self._engine = self._session = None
         if self._config.get('SQLALCHEMY_URL', None):
             self._engine = create_engine(self._config.get('SQLALCHEMY_URL', 'sqlite:///'),
@@ -271,23 +271,23 @@ class ADSCelery(Celery):
             self._session_factory = sessionmaker()
             self._session = scoped_session(self._session_factory)
             self._session.configure(bind=self._engine)
-        
+
         if self._config.get('CELERY_DEFAULT_EXCHANGE_TYPE', 'topic') != 'topic':
             self.logger.warn('The exchange type is not "topic" - ' \
-                             'are you sure CELERY_DEFAULT_EXCHANGE_TYPE is set properly? (%s)', 
+                             'are you sure CELERY_DEFAULT_EXCHANGE_TYPE is set properly? (%s)',
                              self._config.get('CELERY_DEFAULT_EXCHANGE_TYPE', ''))
 
-        self.exchange = Exchange(self._config.get('CELERY_DEFAULT_EXCHANGE', 'ads-pipeline'), 
+        self.exchange = Exchange(self._config.get('CELERY_DEFAULT_EXCHANGE', 'ads-pipeline'),
                 type=self._config.get('CELERY_DEFAULT_EXCHANGE_TYPE', 'topic'))
-        
+
         self.forwarding_connection = None
         if self._config.get('OUTPUT_CELERY_BROKER', None):
             # kombu connection is lazy loaded, so it's ok to create now
             self.forwarding_connection = BrokerConnection(self._config['OUTPUT_CELERY_BROKER'])
 
             if self.conf.get('OUTPUT_TASKNAME', None):
-                
-                @self.task(name=self._config['OUTPUT_TASKNAME'], 
+
+                @self.task(name=self._config['OUTPUT_TASKNAME'],
                      exchange=self._config.get('OUTPUT_EXCHANGE', 'ads-pipeline'),
                      queue=self._config.get('OUTPUT_QUEUE', 'update-record'),
                      routing_key=self._config.get('OUTPUT_QUEUE', 'update-record'))
@@ -295,10 +295,10 @@ class ADSCelery(Celery):
                     """A handler that can be used to forward stuff out of our
                     queue. It does nothing (it doesn't process data)"""
                     self.logger.error('We should have never been called directly! %s' % \
-                                      (args, kwargs)) 
+                                      (args, kwargs))
                 self._forward_message = _forward_message
-                
-    
+
+
     def _set_serializer(self):
         """
         all of our workers should use 'adsmsg' serializer by default; 'json' is backup
@@ -306,13 +306,13 @@ class ADSCelery(Celery):
         """
         if 'adsmsg' not in registry.name_to_type:
             register('adsmsg', *register_args)
-        
-        
+
+
         self.conf['CELERY_ACCEPT_CONTENT'] = ['adsmsg', 'json']
         self.conf['CELERY_TASK_SERIALIZER'] = 'adsmsg'
         self.conf['CELERY_RESULT_SERIALIZER'] = 'adsmsg'
 
-    
+
     def forward_message(self, *args, **kwargs):
         """Class method that is replaced during initializiton with the real
         implementation (IFF) the OUTPUT_TASKNAME and oother OUTPUT_ parameters
@@ -320,9 +320,9 @@ class ADSCelery(Celery):
         if not self.forwarding_connection or not self._forward_message:
             raise NotImplementedError('Sorry, your app is not properly configured.')
         self.logger.debug('Forwarding results out to: %s', self.forwarding_connection)
-        return self._forward_message.apply_async(args, kwargs, 
+        return self._forward_message.apply_async(args, kwargs,
                                                  connection=self.forwarding_connection)
-    
+
     def _get_callers_module(self):
         frame = inspect.stack()[2]
         m = inspect.getmodule(frame[0])
@@ -336,26 +336,26 @@ class ADSCelery(Celery):
         """Closes the app"""
         self._session = self._engine = self._session_factory = None
         self.logger = None
-    
-        
+
+
     @contextmanager
     def session_scope(self):
-        """Provides a transactional session - ie. the session for the 
+        """Provides a transactional session - ie. the session for the
         current thread/work of unit.
-        
+
         Use as:
-        
+
             with session_scope() as session:
                 o = ModelObject(...)
                 session.add(o)
         """
-    
+
         if self._session is None:
             raise Exception('DB not initialized properly, check: SQLALCHEMY_URL')
-        
+
         # create local session (optional step)
         s = self._session()
-        
+
         try:
             yield s
             s.commit()
@@ -364,18 +364,18 @@ class ADSCelery(Celery):
             raise
         finally:
             s.close()
-    
-    
+
+
     def task(self, *args, **opts):
         """Our modification to the Celery.task."""
         if 'base' not in opts:
             opts['base'] = ADSTask
         return Celery.task(self, *args, **opts)
-    
-    
-     
-            
-            
+
+
+
+
+
 class ADSTask(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         # TODO; finish the handling
