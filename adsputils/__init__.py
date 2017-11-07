@@ -20,10 +20,12 @@ import sys
 import time
 from dateutil import parser, tz
 from datetime import datetime
+import socket
 import inspect
 from cloghandler import ConcurrentRotatingFileHandler
 from kombu.serialization import register, registry
 from kombu import Exchange, BrokerConnection
+import logmatic
 from .serializer import register_args
 import random
 
@@ -173,16 +175,7 @@ def setup_logging(name_, level=None, proj_home=None):
         level = config.get('LOGGING_LEVEL', 'INFO')
 
     level = getattr(logging, level)
-
-    logfmt = u'%(asctime)s,%(msecs)03d %(levelname)-8s [%(process)d:%(threadName)s:%(filename)s:%(lineno)d] %(message)s'
-    datefmt = u'%Y-%m-%d %H:%M:%S'
-    #formatter = logging.Formatter(fmt=logfmt, datefmt=datefmt)
-
-    formatter = MultilineMessagesFormatter(fmt=logfmt, datefmt=datefmt)
-    formatter.multiline_marker = ''
-    formatter.multiline_fmt = '     %(message)s'
-
-    formatter.converter = time.gmtime
+    formatter = logmatic.JsonFormatter(extra={"hostname":socket.gethostname()})
     logging_instance = logging.getLogger(name_)
 
     if proj_home:
@@ -438,16 +431,3 @@ class ADSTask(Task):
             self.app.attempt_recovery(self, retval=retval, args=args, kwargs=kwargs, einfo=einfo)
             
 
-class MultilineMessagesFormatter(logging.Formatter):
-
-    def format(self, record):
-        """
-        This is mostly the same as logging.Formatter.format except for adding spaces in front
-        of the multiline messages.
-        """
-        s = logging.Formatter.format(self, record)
-
-        if '\n' in s:
-            return '\n     '.join(s.split('\n'))
-        else:
-            return s

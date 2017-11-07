@@ -4,3 +4,4 @@ python-dateutil==2.6.0
 DateTime==4.1.1
 celery==4.1.0
 SQLAlchemy==1.1.6
+logmatic-python==0.1.7
