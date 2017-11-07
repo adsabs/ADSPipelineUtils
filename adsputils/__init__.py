@@ -431,16 +431,3 @@ class ADSTask(Task):
             self.app.attempt_recovery(self, retval=retval, args=args, kwargs=kwargs, einfo=einfo)
             
 
-class MultilineMessagesFormatter(logging.Formatter):
-
-    def format(self, record):
-        """
-        This is mostly the same as logging.Formatter.format except for adding spaces in front
-        of the multiline messages.
-        """
-        s = logging.Formatter.format(self, record)
-
-        if '\n' in s:
-            return '\n     '.join(s.split('\n'))
-        else:
-            return s
