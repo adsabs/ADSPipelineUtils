@@ -54,7 +54,18 @@ class TestInit(unittest.TestCase):
                 
         self.assertTrue(found)
         self.assertTrue(msecs)
-        
+
+    def test_u2asc(self):
+
+        unicode_handler = adsputils.UnicodeHandler()
+        input1 = 'benìtez, n'
+        input2 = u'izzet, sakallı'
+
+        output1 = unicode_handler.u2asc(input1)
+        output2 = unicode_handler.u2asc(input2)
+
+        self.assertEqual(output1,'benitez, n')
+        self.assertEqual(output2,u'izzet, sakalli')
         
 
 if __name__ == '__main__':

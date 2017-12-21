@@ -5,3 +5,4 @@ DateTime==4.1.1
 celery==4.1.0
 SQLAlchemy==1.1.6
 python-json-logger==0.1.8
+unidecode==0.04.21

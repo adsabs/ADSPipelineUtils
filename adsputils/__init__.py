@@ -31,6 +31,7 @@ from multiprocessing.util import register_after_fork
 from pythonjsonlogger import jsonlogger
 from celery.utils.log import PY3, string_t, text_t, colored, safe_str
 from logging import Formatter
+import unidecode
 
 
 local_zone = tz.tzlocal()
@@ -579,4 +580,39 @@ def get_json_formatter(use_color=False,
                        logfmt = u'%(asctime)s,%(msecs)03d %(levelname)-8s [%(process)d:%(threadName)s:%(filename)s:%(lineno)d] %(message)s',
                        datefmt = TIMESTAMP_FMT):
     return JsonFormatter(logfmt, datefmt, extra={"hostname":socket.gethostname()}, use_color=use_color)
-    
+
+class UnicodeHandlerError(Exception):
+    """
+    Error in the UnicodeHandler.
+    """
+    pass
+
+class UnicodeHandler:
+    """
+    Drop in replacement for the adspy.Unicode class of the same name.
+    Does not yet replicate all functionality.
+    """
+
+    pass
+
+    def u2asc(self, input):
+        """
+        Converts/transliterates unicode characters to ASCII, using the unidecode package.
+        Functionality is similar to the legacy code in adspy, but treats some characters differently
+        (e.g. umlauts).
+
+        :param input: string to be transliterated. Can be either unicode or encoded in utf-8
+        :return output: transliterated string, in either unicode or encoded (to match input)
+        """
+        if not isinstance(input, unicode):
+            input = input.decode('utf-8')
+
+        try:
+            output = unidecode.unidecode(input)
+        except UnicodeDecodeError:
+            raise UnicodeHandlerError
+
+        if not isinstance(input,unicode):
+            output = output.encode('utf-8')
+
+        return output
