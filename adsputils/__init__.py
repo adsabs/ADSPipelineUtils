@@ -488,7 +488,10 @@ class MultilineMessagesFormatter(Formatter):
         have to work around the old time.strftime here."""
         if datefmt:
             s = Formatter.formatTime(self, record, datefmt)
-            return s.replace('f', '%03d' % (record.msecs))
+            if '.f' in s:
+                return s.replace('f', '%03d' % (record.msecs))
+            else:
+                return s.replace('%f', '%03d' % (record.msecs))
         else:
             return Formatter.formatTime(self, record, datefmt) # default ISO8601
 
@@ -539,7 +542,10 @@ class JsonFormatter(jsonlogger.JsonFormatter, object):
         have to work around the old time.strftime here."""
         if datefmt:
             s = Formatter.formatTime(self, record, datefmt)
-            return s.replace('f', '%03d' % (record.msecs))
+            if '.f' in s:
+                return s.replace('f', '%03d' % (record.msecs))
+            else:
+                return s.replace('%f', '%03d' % (record.msecs))
         else:
             return Formatter.formatTime(self, record, datefmt) # default ISO8601
         
