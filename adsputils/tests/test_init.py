@@ -6,6 +6,7 @@ import os
 import json
 import time
 from inspect import currentframe, getframeinfo
+from adsputils.exceptions import UnicodeHandlerError
 
 def _read_file(fpath):
     with open(fpath, 'r') as fi:
@@ -57,16 +58,17 @@ class TestInit(unittest.TestCase):
 
     def test_u2asc(self):
 
-        unicode_handler = adsputils.UnicodeHandler()
         input1 = 'benìtez, n'
         input2 = u'izzet, sakallı'
 
-        output1 = unicode_handler.u2asc(input1)
-        output2 = unicode_handler.u2asc(input2)
+        output1 = adsputils.u2asc(input1)
+        output2 = adsputils.u2asc(input2)
 
         self.assertEqual(output1,'benitez, n')
         self.assertEqual(output2,u'izzet, sakalli')
-        
+
+        input3 = input2.encode('utf16')
+        self.assertRaises(UnicodeHandlerError, adsputils.u2asc, input3)
 
 if __name__ == '__main__':
     unittest.main()

@@ -9,4 +9,8 @@ class ProcessingException(Exception):
     ErrorHandler."""
     pass
 
-        
+class UnicodeHandlerError(Exception):
+    """
+    Error in the UnicodeHandler.
+    """
+    pass

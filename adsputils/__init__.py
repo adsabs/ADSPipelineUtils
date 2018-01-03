@@ -32,7 +32,7 @@ from pythonjsonlogger import jsonlogger
 from celery.utils.log import PY3, string_t, text_t, colored, safe_str
 from logging import Formatter
 import unidecode
-
+from .exceptions import UnicodeHandlerError
 
 local_zone = tz.tzlocal()
 utc_zone = tz.tzutc()
@@ -581,38 +581,30 @@ def get_json_formatter(use_color=False,
                        datefmt = TIMESTAMP_FMT):
     return JsonFormatter(logfmt, datefmt, extra={"hostname":socket.gethostname()}, use_color=use_color)
 
-class UnicodeHandlerError(Exception):
+
+def u2asc(input):
     """
-    Error in the UnicodeHandler.
-    """
-    pass
+    Converts/transliterates unicode characters to ASCII, using the unidecode package.
+    Functionality is similar to the legacy code in adspy.Unicode, but may treat some characters differently
+    (e.g. umlauts). Standard unidecode package only handles Latin-based characters.
 
-class UnicodeHandler:
-    """
-    Drop in replacement for the adspy.Unicode class of the same name.
-    Does not yet replicate all functionality.
+    :param input: string to be transliterated. Can be either unicode or encoded in utf-8
+    :return output: transliterated string, in either unicode or encoded (to match input)
     """
 
-    pass
-
-    def u2asc(self, input):
-        """
-        Converts/transliterates unicode characters to ASCII, using the unidecode package.
-        Functionality is similar to the legacy code in adspy, but treats some characters differently
-        (e.g. umlauts).
-
-        :param input: string to be transliterated. Can be either unicode or encoded in utf-8
-        :return output: transliterated string, in either unicode or encoded (to match input)
-        """
-        if not isinstance(input, unicode):
-            input = input.decode('utf-8')
-
+    # TODO If used on anything but author names, add special handling for math symbols and other special chars
+    if not isinstance(input, unicode):
         try:
-            output = unidecode.unidecode(input)
+            input = input.decode('utf-8')
         except UnicodeDecodeError:
             raise UnicodeHandlerError
 
-        if not isinstance(input,unicode):
-            output = output.encode('utf-8')
+    try:
+        output = unidecode.unidecode(input)
+    except UnicodeDecodeError:
+        raise UnicodeHandlerError
 
-        return output
+    if not isinstance(input,unicode):
+        output = output.encode('utf-8')
+
+    return output
