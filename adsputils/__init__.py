@@ -487,11 +487,8 @@ class MultilineMessagesFormatter(Formatter):
         how to add microsecs. datetime understands that. so we 
         have to work around the old time.strftime here."""
         if datefmt:
-            s = Formatter.formatTime(self, record, datefmt)
-            if '.f' in s:
-                return s.replace('f', '%03d' % (record.msecs))
-            else:
-                return s.replace('%f', '%03d' % (record.msecs))
+            datefmt = datefmt.replace('%f', '%03d' % (record.msecs))
+            return Formatter.formatTime(self, record, datefmt)
         else:
             return Formatter.formatTime(self, record, datefmt) # default ISO8601
 
@@ -541,11 +538,8 @@ class JsonFormatter(jsonlogger.JsonFormatter, object):
         how to add microsecs. datetime understands that. so we 
         have to work around the old time.strftime here."""
         if datefmt:
-            s = Formatter.formatTime(self, record, datefmt)
-            if '.f' in s:
-                return s.replace('f', '%03d' % (record.msecs))
-            else:
-                return s.replace('%f', '%03d' % (record.msecs))
+            datefmt = datefmt.replace('%f', '%03d' % (record.msecs))
+            return Formatter.formatTime(self, record, datefmt)
         else:
             return Formatter.formatTime(self, record, datefmt) # default ISO8601
         
