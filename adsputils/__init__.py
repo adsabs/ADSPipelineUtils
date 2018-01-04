@@ -597,12 +597,12 @@ def u2asc(input):
         try:
             input = input.decode('utf-8')
         except UnicodeDecodeError:
-            raise UnicodeHandlerError
+            raise UnicodeHandlerError('Input must be either unicode or encoded in utf8.')
 
     try:
         output = unidecode.unidecode(input)
     except UnicodeDecodeError:
-        raise UnicodeHandlerError
+        raise UnicodeHandlerError ('Transliteration failed, check input.')
 
     if not isinstance(input,unicode):
         output = output.encode('utf-8')
