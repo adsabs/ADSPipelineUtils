@@ -301,8 +301,8 @@ class ADSCelery(Celery):
 
         # make sure that few important params are set for celery
         if 'broker' not in kwargs:
-            kwargs['broker'] = self._config.get('CELERY_BROKER', 'pyamqp://')
-        if kwargs['broker'] == 'pyamqp://':
+            kwargs['broker'] = self._config.get('CELERY_BROKER', 'pyamqp://'),
+        if kwargs['broker'] == 'pyamqp://',:
             raise ValueError('No value given for CELERY_BROKER, config.py may not be in the correct directory (see proj_home in tasks.py)')
         if 'include' not in kwargs:
             cm = None
