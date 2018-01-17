@@ -303,7 +303,7 @@ class ADSCelery(Celery):
         if 'broker' not in kwargs:
             kwargs['broker'] = self._config.get('CELERY_BROKER', 'pyamqp://'),
         if kwargs['broker'] == ('pyamqp://',):
-            print ('Warning: No value found for CELERY_BROKER, config.py may not be in the correct directory (see proj_home in tasks.py)')
+            print('Warning: No value found for CELERY_BROKER, config.py may not be in the correct directory (see proj_home in tasks.py)')
         if 'include' not in kwargs:
             cm = None
             if 'CELERY_INCLUDE' not in self._config:
@@ -581,4 +581,3 @@ def get_json_formatter(use_color=False,
                        logfmt = u'%(asctime)s,%(msecs)03d %(levelname)-8s [%(process)d:%(threadName)s:%(filename)s:%(lineno)d] %(message)s',
                        datefmt = TIMESTAMP_FMT):
     return JsonFormatter(logfmt, datefmt, extra={"hostname":socket.gethostname()}, use_color=use_color)
-    
