@@ -21,7 +21,8 @@ setup(name='adsputils',
           'SQLAlchemy==1.1.6',
           'setuptools>=36.5.0',
           'six>=1.11.0',
-          'python-json-logger==0.1.8'
+          'python-json-logger==0.1.8',
+          'unidecode==0.04.21'
       ],
       #entry_points={
       #      'kombu.serializers': [
