@@ -1,4 +1,4 @@
-git+https://github.com/adsabs/ADSPipelineMsg.git@v1.0.3
+adsmsg==1.0.3
 ConcurrentLogHandler==0.9.1
 python-dateutil==2.6.0
 DateTime==4.1.1
