@@ -2,7 +2,7 @@ adsmsg==1.0.3
 ConcurrentLogHandler==0.9.1
 python-dateutil==2.6.0
 DateTime==4.1.1
-celery==4.1.0
+celery==4.1.1
 SQLAlchemy==1.1.6
 python-json-logger==0.1.8
 unidecode==0.04.21
