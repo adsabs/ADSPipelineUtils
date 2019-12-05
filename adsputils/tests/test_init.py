@@ -11,7 +11,7 @@ from adsputils.exceptions import UnicodeHandlerError
 def _read_file(fpath):
     with open(fpath, 'r') as fi:
         return fi.read()
-    
+
 class TestInit(unittest.TestCase):
 
     def test_logging(self):
@@ -22,26 +22,25 @@ class TestInit(unittest.TestCase):
         logger = adsputils.setup_logging('foo.bar')
         logger.warn('first')
         frameinfo = getframeinfo(currentframe())
-        
-        logger.handlers[0].stream.flush()
+
         #print foo_log
         self.assertTrue(os.path.exists(foo_log))
         c = _read_file(foo_log)
         j = json.loads(c)
-        
+
         self.assertEqual(j['message'], 'first')
         self.assertTrue('hostname' in j)
- 
+
         # verify warning has filename and linenumber
         self.assertEqual(os.path.basename(frameinfo.filename), j['filename'])
         self.assertEqual(j['lineno'], frameinfo.lineno - 1)
-        
+
         time.sleep(0.01)
         # now multiline message
         logger.warn(u'second\nthird')
         logger.warn('last')
         c = _read_file(foo_log)
-        
+
         found = False
         msecs = False
         for x in c.strip().split('\n'):
@@ -52,7 +51,7 @@ class TestInit(unittest.TestCase):
             t = adsputils.get_date(j['asctime'])
             if t.microsecond > 0:
                 msecs = True
-                
+
         self.assertTrue(found)
         self.assertTrue(msecs)
 
