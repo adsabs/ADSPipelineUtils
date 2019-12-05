@@ -24,7 +24,7 @@ import ast
 from dateutil import parser, tz
 from datetime import datetime
 import inspect
-from cloghandler import ConcurrentRotatingFileHandler
+from concurrent_log_handler import ConcurrentRotatingFileHandler
 from kombu.serialization import register, registry
 from kombu import Exchange, BrokerConnection
 from .serializer import register_args
