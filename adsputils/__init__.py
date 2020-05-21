@@ -43,6 +43,15 @@ utc_zone = tz.tzutc()
 
 TIMESTAMP_FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
+def _set_json_formatter(logger, colorize=False):
+    """
+    Replace the default formatters by the json formatter
+    """
+    for handler in logger.handlers:
+        formatter = handler.formatter
+        handler.formatter = get_json_formatter(use_color=colorize,
+                                               logfmt=formatter._fmt,
+                                               datefmt=TIMESTAMP_FMT)
 
 @signals.after_setup_logger.connect
 def on_celery_setup_logging(**kwargs):
@@ -51,16 +60,21 @@ def on_celery_setup_logging(**kwargs):
     important)."""
 
     logger = kwargs['logger']
-    colorize = kwargs['colorize']
-
-    # replace the default formatters
-    for handler in logger.handlers:
-        formatter = handler.formatter
-        handler.formatter = get_json_formatter(use_color=colorize,
-                                               logfmt=formatter._fmt,
-                                               datefmt=TIMESTAMP_FMT)
-
+    colorize = kwargs.get('colorize', False)
+    _set_json_formatter(logger, colorize=colorize)
     logger.debug('ADSPipelineUtils reconfigured %s to use JSONFormatter', logger)
+
+@signals.after_setup_task_logger.connect
+def on_celery_setup_task_logging(**kwargs):
+    """Update the Celery logging system. We don't touch anything
+    but the formatters (to be safe and not to mess up something
+    important)."""
+
+    logger = kwargs['logger']
+    colorize = kwargs.get('colorize', False)
+    _set_json_formatter(logger, colorize=colorize)
+    logger.debug('ADSPipelineUtils reconfigured %s to use JSONFormatter', logger)
+
 
 
 def _get_proj_home(extra_frames=0):
@@ -263,6 +277,9 @@ def setup_logging(name_, level=None, proj_home=None, attach_stdout=False):
         stdout = logging.StreamHandler(sys.stdout)
         stdout.formatter = get_json_formatter()
         logging_instance.addHandler(stdout)
+
+    # Do not propagate to the parent logger to avoid double logging with different formatters
+    logging_instance.propagate = False
 
     return logging_instance
 
@@ -554,7 +571,7 @@ class JsonFormatter(jsonlogger.JsonFormatter, object):
         if "asctime" in log_record:
             log_record["timestamp"] = log_record["asctime"]
         else:
-            log_record["timestamp"] = datetime.datetime.utcnow().strftime(TIMESTAMP_FMT)
+            log_record["timestamp"] = datetime.utcnow().strftime(TIMESTAMP_FMT)
             log_record["asctime"] = log_record["timestamp"]
 
         if self._extra is not None:
