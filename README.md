@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/adsabs/ADSPipelineUtils.svg?branch=master)](https://travis-ci.org/adsabs/ADSPipelineUtils)
+[![Python CI actions](https://github.com/adsabs/ADSPipelineUtils/actions/workflows/python_actions.yml/badge.svg)](https://github.com/adsabs/ADSPipelineUtils/actions/workflows/python_actions.yml)
 [![Coverage Status](https://coveralls.io/repos/github/adsabs/ADSPipelineUtils/badge.svg?branch=master)](https://coveralls.io/github/adsabs/ADSPipelineUtils?branch=master)
 
 # ADSPipelineUtils
