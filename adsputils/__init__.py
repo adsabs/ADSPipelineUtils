@@ -409,7 +409,7 @@ class ADSCelery(Celery):
         self.conf['CELERY_TASK_SERIALIZER'] = 'adsmsg'
         self.conf['CELERY_RESULT_SERIALIZER'] = 'adsmsg'
 
-    def forward_message(self, *args, output_taskname=None, output_celery_broker=None, **kwargs):
+    def forward_message(self, output_taskname=None, output_celery_broker=None, *args, **kwargs):
         """Class method that sets up the message forwarding handler dynamically based on
         OUTPUT_TASKNAME and OUTPUT_CELERY_BROKER."""
 
