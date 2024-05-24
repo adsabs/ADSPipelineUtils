@@ -382,22 +382,7 @@ class ADSCelery(Celery):
                 type=self._config.get('CELERY_DEFAULT_EXCHANGE_TYPE', 'topic'))
 
         self.forwarding_connection = None
-        if self._config.get('OUTPUT_CELERY_BROKER', None):
-            # kombu connection is lazy loaded, so it's ok to create now
-            self.forwarding_connection = BrokerConnection(self._config['OUTPUT_CELERY_BROKER'])
-
-            if self.conf.get('OUTPUT_TASKNAME', None):
-
-                @self.task(name=self._config['OUTPUT_TASKNAME'],
-                           exchange=self._config.get('OUTPUT_EXCHANGE', 'ads-pipeline'),
-                           queue=self._config.get('OUTPUT_QUEUE', 'update-record'),
-                           routing_key=self._config.get('OUTPUT_QUEUE', 'update-record'))
-                def _forward_message(self, *args, **kwargs):
-                    """A handler that can be used to forward stuff out of our
-                    queue. It does nothing (it doesn't process data)"""
-                    self.logger.error('We should have never been called directly! %s' % \
-                                      (args, kwargs))
-                self._forward_message = _forward_message
+        self._forward_message = None
 
         # HTTP connection pool
         # - The maximum number of retries each connection should attempt: this
@@ -424,12 +409,36 @@ class ADSCelery(Celery):
         self.conf['CELERY_TASK_SERIALIZER'] = 'adsmsg'
         self.conf['CELERY_RESULT_SERIALIZER'] = 'adsmsg'
 
-    def forward_message(self, *args, **kwargs):
-        """Class method that is replaced during initializiton with the real
-        implementation (IFF) the OUTPUT_TASKNAME and oother OUTPUT_ parameters
-        are specified."""
-        if not self.forwarding_connection or not self._forward_message:
-            raise NotImplementedError('Sorry, your app is not properly configured.')
+    def forward_message(self, *args, output_taskname=None, output_celery_broker=None, **kwargs):
+        """Class method that sets up the message forwarding handler dynamically based on
+        OUTPUT_TASKNAME and OUTPUT_CELERY_BROKER."""
+
+        # Use OUTPUT_CELERY_BROKER from config if not provided at call time
+        broker = output_celery_broker or self._config.get('OUTPUT_CELERY_BROKER')
+        if broker:
+            # kombu connection is lazy loaded, so it's ok to create now
+            self.forwarding_connection = BrokerConnection(broker)
+
+        if not self.forwarding_connection:
+            raise NotImplementedError('Sorry, your app is not properly configured (no broker).')
+
+        # Use OUTPUT_TASKNAME from config if not provided at call time
+        task_name = output_taskname or self._config.get('OUTPUT_TASKNAME')
+
+        if task_name:
+            @self.task(name=task_name,
+                       exchange=self._config.get('OUTPUT_EXCHANGE', 'ads-pipeline'),
+                       queue=self._config.get('OUTPUT_QUEUE', 'update-record'),
+                       routing_key=self._config.get('OUTPUT_QUEUE', 'update-record'))
+            def _forward_message(*args, **kwargs):
+                """A handler that can be used to forward stuff out of our queue. It does nothing (it doesn't process data)."""
+                self.logger.error('We should have never been called directly! %s' % (args, kwargs))
+
+            self._forward_message = _forward_message
+
+        if not self._forward_message:
+            raise NotImplementedError('Sorry, your app is not properly configured (no task handler).')
+
         self.logger.debug('Forwarding results out to: %s', self.forwarding_connection)
         return self._forward_message.apply_async(args, kwargs,
                                                  connection=self.forwarding_connection)
