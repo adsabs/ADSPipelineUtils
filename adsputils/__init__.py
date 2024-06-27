@@ -435,7 +435,7 @@ class ADSCelery(Celery):
         self.conf['CELERY_TASK_SERIALIZER'] = 'adsmsg'
         self.conf['CELERY_RESULT_SERIALIZER'] = 'adsmsg'
 
-    def forward_message(self, pipeline=None, *args, **kwargs):
+    def forward_message(self, *args, **kwargs):
         """Class method that is replaced during initializiton with the real
         implementation (IFF) the OUTPUT_TASKNAME and other OUTPUT_ parameters
         are specified."""
