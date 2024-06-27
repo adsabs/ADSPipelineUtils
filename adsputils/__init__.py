@@ -438,7 +438,20 @@ class ADSCelery(Celery):
     def forward_message(self, *args, **kwargs):
         """Class method that is replaced during initializiton with the real
         implementation (IFF) the OUTPUT_TASKNAME and other OUTPUT_ parameters
-        are specified."""
+        are specified.
+
+        To set in config:
+        - For a single output destination:
+            - OUTPUT_CELERY_BROKER
+            - OUTPUT_TASKNAME
+            At call time:
+                self.forward_message(message)
+
+        - For multiple output destinations:
+            - FORWARD_MSG_DICT = [{OUTPUT_PIPELINE: , OUTPUT_CELERY_BROKER: , OUTPUT_TASKNAME: }, ...]
+            where OUTPUT_PIPELINE is a string that will need to be specified in the call to forward_message as:
+                self.forward_message(message, pipeline=OUTPUT_PIPELINE)
+        """
         pipeline = kwargs.get('pipeline', 'default')
 
         if self.forward_message_dict and pipeline:
