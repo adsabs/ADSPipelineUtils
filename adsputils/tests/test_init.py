@@ -69,5 +69,32 @@ class TestInit(unittest.TestCase):
         input3 = input2.encode('utf16')
         self.assertRaises(UnicodeHandlerError, adsputils.u2asc, input3)
 
+class TestCelery(unittest.TestCase):
+
+    def test_forward_message_single(self):
+        app = adsputils.ADSCelery('test',local_config={
+            'OUTPUT_CELERY_BROKER': 'testbroker',
+            'OUTPUT_TASKNAME': 'testtaskname'
+            })
+
+        self.assertIn('default',app.forward_message_dict.keys())
+        self.assertEqual(app.forward_message_dict['default'].get('broker'), 'testbroker')
+
+    def test_forward_message_multiple(self):
+        app = adsputils.ADSCelery('test', local_config={
+            'FORWARD_MSG_DICT': [{'OUTPUT_PIPELINE': 'augment',
+                                  'OUTPUT_CELERY_BROKER': 'testbroker',
+                                  'OUTPUT_TASKNAME': 'testtaskname'},
+                                 {'OUTPUT_PIPELINE': 'classifier',
+                                  'OUTPUT_CELERY_BROKER': 'testbroker2',
+                                  'OUTPUT_TASKNAME': 'testtaskname2'}]
+        })
+
+        self.assertEqual(len(app.forward_message_dict.keys()), 2)
+        self.assertIn('augment', app.forward_message_dict.keys())
+        self.assertIn('classifier', app.forward_message_dict.keys())
+        self.assertIn('broker', app.forward_message_dict['augment'].keys())
+        self.assertEqual(app.forward_message_dict['augment']['broker'], 'testbroker')
+
 if __name__ == '__main__':
     unittest.main()
