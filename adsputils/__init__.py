@@ -439,8 +439,8 @@ class ADSCelery(Celery):
         """Class method that is replaced during initializiton with the real
         implementation (IFF) the OUTPUT_TASKNAME and other OUTPUT_ parameters
         are specified."""
-        if not pipeline:
-            pipeline = 'default'
+        pipeline = kwargs.get('pipeline', 'default')
+        
         if self.forward_message_dict and pipeline:
             if not self.forward_message_dict[pipeline].get('broker'):
                 raise NotImplementedError('Sorry, your app is not properly configured (no broker).')
