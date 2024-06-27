@@ -440,13 +440,13 @@ class ADSCelery(Celery):
         implementation (IFF) the OUTPUT_TASKNAME and other OUTPUT_ parameters
         are specified."""
         pipeline = kwargs.get('pipeline', 'default')
-        
+
         if self.forward_message_dict and pipeline:
             if not self.forward_message_dict[pipeline].get('broker'):
                 raise NotImplementedError('Sorry, your app is not properly configured (no broker).')
             forwarding_connection = BrokerConnection(self.forward_message_dict[pipeline].get('broker'))
-            self.logger.debug('Forwarding results out to: %s', self.forwarding_connection)
-            return self.forward_message_dict[pipeline].apply_async(args, kwargs, connection=forwarding_connection)
+            self.logger.debug('Forwarding results out to: %s', self.forward_message_dict[pipeline].get('broker'))
+            return self.forward_message_dict[pipeline]['forward message'].apply_async(args, kwargs, connection=forwarding_connection)
         else:
             raise NotImplementedError('Sorry, your app is not properly configured.')
 
