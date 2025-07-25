@@ -34,6 +34,7 @@ setup(
                  'Programming Language :: Python :: 3.7'],
     url='https://github.com/adsabs/ADSPipelineUtils',
     license='MIT',
+    license_file=["LICENSE"],
     author="NASA/SAO ADS",
     description='ADS Pipeline Utils',
     long_description=long_description,
