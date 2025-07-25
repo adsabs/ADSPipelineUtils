@@ -35,7 +35,7 @@ setup(
                  "License :: OSI Approved :: MIT License"],
     url='https://github.com/adsabs/ADSPipelineUtils',
     license='MIT',
-    license_file=["LICENSE"],
+    license_files=["LICENSE"],
     author="NASA/SAO ADS",
     description='ADS Pipeline Utils',
     long_description=long_description,
