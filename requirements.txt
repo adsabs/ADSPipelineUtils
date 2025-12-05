@@ -1,4 +1,4 @@
-adsmsg==1.3.16
+adsmsg==1.3.17
 concurrent-log-handler==0.9.20
 python-dateutil==2.9.0.post0
 DateTime==4.1.1
