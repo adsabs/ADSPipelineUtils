@@ -8,4 +8,4 @@ python-json-logger==0.1.8
 setuptools<45
 unidecode==1.2.0
 requests==2.27.1
-future==0.18.2
+future==0.18.3
